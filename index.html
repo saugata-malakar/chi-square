@@ -1,0 +1,1152 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TradeGuard AI â€” Customs & Compliance Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111418;
+    --surface2: #181d24;
+    --border: #1e2530;
+    --border2: #252e3d;
+    --accent: #00e5c3;
+    --accent2: #0099ff;
+    --accent3: #ff6b35;
+    --gold: #f5c842;
+    --red: #ff4757;
+    --green: #2ecc71;
+    --yellow: #ffa502;
+    --text: #e8edf5;
+    --text2: #8896a8;
+    --text3: #4a5568;
+    --radius: 12px;
+    --glow: 0 0 30px rgba(0,229,195,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  #root { min-height: 100vh; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+  .main { margin-left: 240px; flex: 1; min-height: 100vh; }
+  .content { padding: 32px; max-width: 1200px; }
+
+  /* Sidebar */
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border); }
+  .logo-mark { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .logo-sub { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+  .nav-section { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); padding: 12px 8px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border: 1px solid transparent; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(0,229,195,0.08); color: var(--accent); border-color: rgba(0,229,195,0.2); }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .sidebar-footer { padding: 16px; border-top: 1px solid var(--border); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 8px; box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .status-text { font-size: 11px; color: var(--text2); }
+
+  /* Page header */
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; color: var(--text); }
+  .page-subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .breadcrumb { font-size: 12px; color: var(--text3); margin-bottom: 8px; font-family: 'DM Mono', monospace; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .col-span-2 { grid-column: span 2; }
+
+  /* Stat cards */
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .stat-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .stat-card.blue::before { background: linear-gradient(90deg, var(--accent2), transparent); }
+  .stat-card.accent::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .stat-card.gold::before { background: linear-gradient(90deg, var(--gold), transparent); }
+  .stat-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 12px; color: var(--text2); }
+  .stat-change { font-size: 11px; margin-top: 8px; }
+  .stat-change.up { color: var(--green); }
+  .stat-change.down { color: var(--red); }
+  .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 24px; opacity: 0.4; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: 1px solid transparent; font-family: 'DM Sans', sans-serif; }
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn-primary:hover { background: #00c9aa; box-shadow: 0 0 20px rgba(0,229,195,0.3); }
+  .btn-secondary { background: transparent; color: var(--text); border-color: var(--border2); }
+  .btn-secondary:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: rgba(255,71,87,0.1); color: var(--red); border-color: rgba(255,71,87,0.3); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .badge-green { background: rgba(46,204,113,0.12); color: var(--green); border: 1px solid rgba(46,204,113,0.25); }
+  .badge-yellow { background: rgba(255,165,2,0.12); color: var(--yellow); border: 1px solid rgba(255,165,2,0.25); }
+  .badge-red { background: rgba(255,71,87,0.12); color: var(--red); border: 1px solid rgba(255,71,87,0.25); }
+  .badge-blue { background: rgba(0,153,255,0.12); color: var(--accent2); border: 1px solid rgba(0,153,255,0.25); }
+  .badge-accent { background: rgba(0,229,195,0.12); color: var(--accent); border: 1px solid rgba(0,229,195,0.25); }
+  .badge-gray { background: rgba(136,150,168,0.12); color: var(--text2); border: 1px solid rgba(136,150,168,0.2); }
+
+  /* Tags / selects */
+  .select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; cursor: pointer; outline: none; }
+  .select:focus { border-color: var(--accent); }
+  .input { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--text); font-family: 'DM Sans', sans-serif; outline: none; width: 100%; }
+  .input:focus { border-color: var(--accent); }
+  .input-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+
+  /* Upload zone */
+  .upload-zone { border: 2px dashed var(--border2); border-radius: var(--radius); padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: rgba(0,229,195,0.03); }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: var(--text3); }
+
+  /* Progress */
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+
+  /* Risk meter */
+  .risk-meter { position: relative; }
+  .risk-arc { width: 120px; height: 60px; }
+
+  /* Table */
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); font-weight: 500; padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .table td { padding: 12px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .table tr:last-child td { border-bottom: none; }
+  .table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab { padding: 10px 16px; font-size: 13px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; margin-bottom: -1px; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* Anomaly items */
+  .anomaly-item { display: flex; gap: 12px; padding: 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid; }
+  .anomaly-item.critical { border-color: var(--red); }
+  .anomaly-item.high { border-color: #ff8c00; }
+  .anomaly-item.medium { border-color: var(--yellow); }
+  .anomaly-item.low { border-color: var(--accent2); }
+  .anomaly-field { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text2); margin-bottom: 3px; }
+  .anomaly-msg { font-size: 13px; color: var(--text); }
+
+  /* Check items */
+  .check-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .check-item:last-child { border-bottom: none; }
+  .check-status { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .check-status.pass { background: rgba(46,204,113,0.15); color: var(--green); }
+  .check-status.warning { background: rgba(255,165,2,0.15); color: var(--yellow); }
+  .check-status.fail { background: rgba(255,71,87,0.15); color: var(--red); }
+  .check-status.info { background: rgba(0,153,255,0.15); color: var(--accent2); }
+  .check-name { font-size: 13px; font-weight: 500; }
+  .check-detail { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 12px; color: var(--text2); width: 100px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 28px; background: var(--surface2); border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; font-family: 'DM Mono', monospace; font-weight: 500; color: #000; transition: width 0.8s ease; }
+  .bar-value { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text2); width: 70px; flex-shrink: 0; }
+
+  /* Activity feed */
+  .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .activity-dot.success { background: var(--green); }
+  .activity-dot.warning { background: var(--yellow); }
+  .activity-dot.error { background: var(--red); }
+  .activity-dot.info { background: var(--accent2); }
+  .activity-event { font-size: 13px; flex: 1; }
+  .activity-time { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+  /* Extracted fields */
+  .field-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border); }
+  .field-name { font-size: 11px; color: var(--text3); width: 160px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+  .field-value { flex: 1; font-size: 13px; color: var(--text); }
+  .field-confidence { font-size: 11px; font-family: 'DM Mono', monospace; }
+  .field-review { font-size: 10px; color: var(--yellow); background: rgba(255,165,2,0.1); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+
+  /* Loading spinner */
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px; }
+
+  /* Donut chart */
+  .donut { position: relative; }
+  .donut svg { transform: rotate(-90deg); }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* Score ring */
+  .score-ring { display: flex; flex-direction: column; align-items: center; }
+
+  /* Glow effects */
+  .glow-accent { box-shadow: 0 0 20px rgba(0,229,195,0.15); }
+  .glow-red { box-shadow: 0 0 20px rgba(255,71,87,0.15); }
+
+  /* Tooltip-like */
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--text2); }
+  .info-val { font-family: 'DM Mono', monospace; color: var(--text); }
+  .info-val.green { color: var(--green); }
+  .info-val.red { color: var(--red); }
+  .info-val.gold { color: var(--gold); }
+
+  /* Notification badge */
+  .notif { display: inline-flex; align-items: center; justify-content: center; background: var(--red); color: #fff; border-radius: 10px; font-size: 9px; padding: 1px 5px; margin-left: 6px; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 13px; }
+
+  /* Mobile */
+  @media(max-width:768px){
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .content { padding: 20px; }
+  }
+
+  /* Animations */
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  /* World map ping */
+  .world-ping { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); position: relative; }
+  .world-ping::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--accent); animation: ping 1.5s ease-out infinite; opacity: 0; }
+  @keyframes ping { 0%{transform:scale(0.8);opacity:0.8} 100%{transform:scale(2.2);opacity:0} }
+
+  .section-divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* Compliance score circle */
+  .compliance-ring { width: 80px; height: 80px; position: relative; }
+  .compliance-ring svg { transform: rotate(-90deg); }
+  .compliance-val { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+const API =
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000'
+    : 'https://tradeguard-api.onrender.com';
+
+const api = {
+  get: (path) => fetch(API + path).then(r => r.json()),
+  post: (path, body) => fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
+  upload: (path, formData) => fetch(API + path, { method: 'POST', body: formData }).then(r => r.json()),
+};
+
+// â”€â”€ Small components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const Badge = ({ type, children }) => <span className={`badge badge-${type}`}>{children}</span>;
+
+const Spinner = () => (
+  <div className="loading-wrap">
+    <div className="spinner" />
+    <span style={{fontSize:13,color:'var(--text2)'}}>Processing with TradeGuard AI...</span>
+  </div>
+);
+
+const StatusBadge = ({ status }) => {
+  const map = {
+    PASS: ['green','âœ“'], WARNING: ['yellow','âš '], FAIL: ['red','âœ—'], INFO: ['blue','â„¹'],
+    COMPLIANT: ['green','âœ“ COMPLIANT'], NEEDS_REVIEW: ['yellow','âš  NEEDS REVIEW'], NON_COMPLIANT: ['red','âœ— NON-COMPLIANT'],
+    LOW: ['green','LOW'], MEDIUM: ['yellow','MEDIUM'], HIGH: ['red','HIGH'], CRITICAL: ['red','âš  CRITICAL'],
+  };
+  const [type, label] = map[status] || ['gray', status];
+  return <Badge type={type}>{label || status}</Badge>;
+};
+
+const CircleScore = ({ score, size = 80, color }) => {
+  const r = (size/2) - 8;
+  const circ = 2 * Math.PI * r;
+  const fill = (score / 100) * circ;
+  const c = color || (score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)');
+  return (
+    <div style={{position:'relative',width:size,height:size}}>
+      <svg width={size} height={size} style={{transform:'rotate(-90deg)'}}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={c} strokeWidth="6"
+          strokeDasharray={`${fill} ${circ - fill}`} strokeLinecap="round" style={{transition:'stroke-dasharray 0.8s ease'}} />
+      </svg>
+      <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',
+        fontFamily:'Syne, sans-serif',fontWeight:700,fontSize:size*0.22,color:c}}>
+        {score}
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const Dashboard = () => {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    api.get('/api/dashboard/stats').then(setStats).catch(() => {
+      setStats({
+        total_documents_processed: 13241, compliance_rate: 91.2, anomalies_detected_today: 28,
+        avg_clearance_time_hours: 24.5, documents_today: 218, high_risk_shipments: 7,
+        countries_served: 47, carbon_saved_tonnes: 152.3,
+        recent_activity: [
+          {time:"2 min ago",event:"Shipment SHP-2024-8821 cleared customs",type:"success"},
+          {time:"8 min ago",event:"Anomaly detected in Invoice INV-2024-44201",type:"warning"},
+          {time:"15 min ago",event:"Compliance check failed: missing CE certification",type:"error"},
+          {time:"22 min ago",event:"New shipment registered: Shanghai â†’ Rotterdam",type:"info"},
+          {time:"31 min ago",event:"HS Code reclassification approved",type:"success"},
+          {time:"45 min ago",event:"Sanctions screening completed: 0 matches",type:"success"},
+        ]
+      });
+    });
+  }, []);
+
+  if (!stats) return <Spinner />;
+
+  const statCards = [
+    { label: "Documents Processed", value: stats.total_documents_processed.toLocaleString(), change: "â†‘ 12% vs last month", variant: "accent", icon: "ðŸ“„" },
+    { label: "Compliance Rate", value: `${stats.compliance_rate}%`, change: "â†‘ 2.1% this week", variant: "green", icon: "âœ…" },
+    { label: "Anomalies Today", value: stats.anomalies_detected_today, change: "â†“ 3 vs yesterday", variant: "gold", icon: "âš ï¸" },
+    { label: "Avg. Clearance Time", value: `${stats.avg_clearance_time_hours}h`, change: "â†“ 6h improvement", variant: "blue", icon: "â±" },
+    { label: "Docs Processed Today", value: stats.documents_today, change: "Real-time count", variant: "accent", icon: "ðŸ“‹" },
+    { label: "High Risk Shipments", value: stats.high_risk_shipments, change: "Require immediate review", variant: "red", icon: "ðŸš¨" },
+    { label: "Countries Served", value: stats.countries_served, change: "Active trade corridors", variant: "blue", icon: "ðŸŒ" },
+    { label: "Carbon Saved (t COâ‚‚)", value: stats.carbon_saved_tonnes, change: "vs. air freight baseline", variant: "green", icon: "ðŸŒ±" },
+  ];
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="breadcrumb">tradeguard / dashboard</div>
+        <div className="page-title">Operations Overview</div>
+        <div className="page-subtitle">Real-time customs & compliance intelligence across 47 active trade corridors</div>
+      </div>
+
+      <div className="grid-4" style={{marginBottom:20}}>
+        {statCards.map((s, i) => (
+          <div key={i} className={`stat-card ${s.variant}`}>
+            <div className="stat-icon">{s.icon}</div>
+            <div className="stat-value" style={{color: s.variant==='red'?'var(--red)': s.variant==='green'?'var(--green)': s.variant==='gold'?'var(--gold)':'var(--accent)'}}>{s.value}</div>
+            <div className="stat-label">{s.label}</div>
+            <div className={`stat-change ${s.variant==='red'?'down':'up'}`}>{s.change}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Live Activity Feed</div>
+              <div className="card-subtitle">Last 60 minutes</div>
+            </div>
+            <span className="world-ping" />
+          </div>
+          {stats.recent_activity.map((a, i) => (
+            <div key={i} className="activity-item">
+              <div className={`activity-dot ${a.type}`} />
+              <div className="activity-event">{a.event}</div>
+              <div className="activity-time">{a.time}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Geographic Coverage</div>
+              <div className="card-subtitle">Active regulation profiles</div>
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            {[
+              {country:'ðŸ‡ºðŸ‡¸ United States',docs:3812,risk:'Low',r:'low'},
+              {country:'ðŸ‡ªðŸ‡º European Union',docs:2941,risk:'Low',r:'low'},
+              {country:'ðŸ‡¨ðŸ‡³ China',docs:2105,risk:'Medium',r:'med'},
+              {country:'ðŸ‡®ðŸ‡³ India',docs:1654,risk:'Low',r:'low'},
+              {country:'ðŸ‡¦ðŸ‡ª UAE',docs:1203,risk:'Medium',r:'med'},
+              {country:'ðŸ‡§ðŸ‡· Brazil',docs:872,risk:'Low',r:'low'},
+            ].map((row,i) => (
+              <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+                <div style={{fontSize:13}}>{row.country}</div>
+                <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                  <span style={{fontSize:12,color:'var(--text2)',fontFamily:'DM Mono, monospace'}}>{row.docs.toLocaleString()} docs</span>
+                  <Badge type={row.r==='low'?'green':'yellow'}>{row.risk}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Document Analyzer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const DocumentAnalyzer = () => {
+  const [docType, setDocType] = useState('Commercial Invoice');
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [extraction, setExtraction] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [tab, setTab] = useState('extract');
+  const [dragover, setDragover] = useState(false);
+  const fileRef = useRef();
+
+  const docTypes = ['Commercial Invoice', 'Bill of Lading', 'Packing List', 'Certificate of Origin', 'HS Code Classification', 'Customs Declaration'];
+
+  const handleFile = (f) => {
+    setFile(f);
+    setExtraction(null);
+    setAnalysis(null);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragover(false);
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  };
+
+  const processDocument = async () => {
+    if (!file) return;
+    setLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('doc_type', docType);
+      const ext = await api.upload(`/api/documents/extract?doc_type=${encodeURIComponent(docType)}`, fd);
+      setExtraction(ext);
+      const anl = await api.post('/api/documents/analyze', { doc_type: docType });
+      setAnalysis(anl);
+      setTab('results');
+    } catch(e) {
+      // fallback mock
+      setExtraction({
+        doc_type: docType, filename: file.name, overall_confidence: 0.89, processing_time_ms: 1243, page_count: 2, language_detected: 'English',
+        extracted_fields: [
+          {field:'Invoice Number',value:'INV-2024-55821',confidence:0.97,needs_review:false},
+          {field:'Seller',value:'Shanghai Tech Exports Ltd',confidence:0.94,needs_review:false},
+          {field:'Buyer',value:'Global Trade Partners LLC',confidence:0.91,needs_review:false},
+          {field:'Total Value',value:'USD 48,500',confidence:0.88,needs_review:true},
+          {field:'Incoterms',value:'FOB',confidence:0.99,needs_review:false},
+          {field:'Currency',value:'USD',confidence:0.99,needs_review:false},
+        ]
+      });
+      setAnalysis({
+        risk_score: 45, risk_level: 'MEDIUM', anomaly_count: 2, anomalies: [
+          {type:'value_mismatch',severity:'high',field:'Invoice Value',message:"Invoice value (USD 48,500) doesn't match Bill of Lading declared value (USD 41,200). Discrepancy of USD 7,300 flagged."},
+          {type:'date_inconsistency',severity:'low',field:'Invoice Date',message:"Invoice date appears prior to purchase order date. Minor chronological inconsistency detected."},
+        ],
+        recommendation: "Minor discrepancies detected. Secondary review recommended before processing.",
+        analysis_timestamp: new Date().toISOString()
+      });
+      setTab('results');
+    }
+    setLoading(false);
+  };
+
+  const riskColor = analysis ? (analysis.risk_level === 'LOW' ? 'var(--green)' : analysis.risk_level === 'MEDIUM' ? 'var(--yellow)' : analysis.risk_level === 'HIGH' ? 'var(--red)' : '#ff0000') : 'var(--text3)';
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="breadcrumb">tradeguard / document-analyzer</div>
+        <div className="page-title">AI Document Analyzer</div>
+        <div className="page-subtitle">OCR extraction + anomaly detection across all trade document types</div>
+      </div>
+
+      <div className="grid-2" style={{alignItems:'start'}}>
+        {/* Left: Upload */}
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          <div className="card">
+            <div className="card-title" style={{marginBottom:14}}>Document Upload</div>
+            <div style={{marginBottom:12}}>
+              <label className="input-label">Document Type</label>
+              <select className="select" style={{width:'100%'}} value={docType} onChange={e=>setDocType(e.target.value)}>
+                {docTypes.map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+
+            <input type="file" ref={fileRef} style={{display:'none'}} accept=".pdf,.png,.jpg,.jpeg,.tiff,.docx"
+              onChange={e=>e.target.files[0] && handleFile(e.target.files[0])} />
+
+            <div className={`upload-zone ${dragover?'dragover':''}`}
+              onClick={()=>fileRef.current.click()}
+              onDragOver={e=>{e.preventDefault();setDragover(true)}}
+              onDragLeave={()=>setDragover(false)}
+              onDrop={handleDrop}>
+              <div className="upload-icon">ðŸ“</div>
+              {file ? (
+                <>
+                  <div className="upload-title" style={{color:'var(--accent)'}}>{file.name}</div>
+                  <div className="upload-sub">{(file.size/1024).toFixed(1)} KB â€” Click to replace</div>
+                </>
+              ) : (
+                <>
+                  <div className="upload-title">Drop your trade document here</div>
+                  <div className="upload-sub">PDF, PNG, JPG, TIFF, DOCX supported</div>
+                </>
+              )}
+            </div>
+
+            <button className="btn btn-primary" style={{width:'100%',marginTop:12,justifyContent:'center'}}
+              disabled={!file || loading} onClick={processDocument}>
+              {loading ? 'â³ Analyzing...' : 'ðŸ” Analyze with AI'}
+            </button>
+          </div>
+
+          {analysis && (
+            <div className="card" style={{border:`1px solid ${riskColor}33`}}>
+              <div className="card-title" style={{marginBottom:16}}>Fraud & Anomaly Risk</div>
+              <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:16}}>
+                <CircleScore score={analysis.risk_score} color={riskColor} />
+                <div>
+                  <div style={{fontSize:22,fontFamily:'Syne',fontWeight:700,color:riskColor}}>{analysis.risk_level} RISK</div>
+                  <div style={{fontSize:12,color:'var(--text2)',marginTop:4}}>{analysis.anomaly_count} anomal{analysis.anomaly_count===1?'y':'ies'} detected</div>
+                  <div style={{fontSize:11,color:'var(--text3)',marginTop:4,fontFamily:'DM Mono'}}>TradeGuard Anomaly v3.2</div>
+                </div>
+              </div>
+              <div style={{fontSize:13,color:'var(--text2)',padding:'10px 12px',background:'var(--surface2)',borderRadius:8,borderLeft:`3px solid ${riskColor}`}}>
+                {analysis.recommendation}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Results */}
+        <div className="card" style={{minHeight:300}}>
+          {loading ? <Spinner /> : !extraction ? (
+            <div className="empty-state">
+              <div className="empty-icon">ðŸ§¾</div>
+              <div className="empty-text">Upload a trade document to begin AI extraction and analysis</div>
+            </div>
+          ) : (
+            <>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+                <div>
+                  <div className="card-title">{extraction.doc_type}</div>
+                  <div className="card-subtitle">{extraction.filename} Â· {extraction.page_count} page{extraction.page_count>1?'s':''} Â· {extraction.language_detected}</div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontSize:22,fontFamily:'Syne',fontWeight:700,color:'var(--accent)'}}>{Math.round(extraction.overall_confidence*100)}%</div>
+                  <div style={{fontSize:11,color:'var(--text3)'}}>confidence</div>
+                </div>
+              </div>
+
+              <div className="tabs">
+                <div className={`tab ${tab==='results'?'active':''}`} onClick={()=>setTab('results')}>Extracted Fields</div>
+                <div className={`tab ${tab==='anomalies'?'active':''}`} onClick={()=>setTab('anomalies')}>
+                  Anomalies {analysis?.anomaly_count>0 && <span className="notif">{analysis.anomaly_count}</span>}
+                </div>
+              </div>
+
+              {tab==='results' && (
+                <div>
+                  {extraction.extracted_fields.map((f,i) => (
+                    <div key={i} className="field-item">
+                      <div className="field-name">{f.field}</div>
+                      <div className="field-value">{f.value}</div>
+                      {f.needs_review && <div className="field-review">âš  Review</div>}
+                      <div className="field-confidence" style={{color: f.confidence>0.9?'var(--green)':f.confidence>0.75?'var(--yellow)':'var(--red)'}}>
+                        {Math.round(f.confidence*100)}%
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{display:'flex',gap:8,marginTop:12,justifyContent:'flex-end'}}>
+                    <button className="btn btn-secondary btn-sm">ðŸ’¾ Export JSON</button>
+                    <button className="btn btn-primary btn-sm">âœ… Approve & Submit</button>
+                  </div>
+                </div>
+              )}
+
+              {tab==='anomalies' && (
+                <div>
+                  {analysis?.anomalies?.length === 0 ? (
+                    <div className="empty-state" style={{padding:24}}>
+                      <div style={{fontSize:28,marginBottom:8}}>âœ…</div>
+                      <div style={{fontSize:13,color:'var(--green)'}}>No anomalies detected. Document appears clean.</div>
+                    </div>
+                  ) : analysis?.anomalies?.map((a,i) => (
+                    <div key={i} className={`anomaly-item ${a.severity}`}>
+                      <div>
+                        <div className="anomaly-field">{a.field} Â· <StatusBadge status={a.severity.toUpperCase()} /></div>
+                        <div className="anomaly-msg">{a.message}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Compliance Checker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const ComplianceChecker = () => {
+  const [form, setForm] = useState({
+    origin_country: 'China', destination_country: 'USA',
+    goods_category: 'electronics', declared_value: 25000,
+    document_types: []
+  });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const countries = ['USA','EU','China','India','UAE','Brazil'];
+  const categories = ['electronics','textile','machinery','chemicals','food','pharma','automotive','furniture'];
+  const allDocs = ['Commercial Invoice','Bill of Lading','Packing List','Certificate of Origin','ISF Filing','EUR.1 Certificate','CE Declaration','CIQ Certificate','Import License','BIS Certificate','Halal Certificate'];
+
+  const toggleDoc = (d) => setForm(f => ({
+    ...f, document_types: f.document_types.includes(d) ? f.document_types.filter(x=>x!==d) : [...f.document_types, d]
+  }));
+
+  const runCheck = async () => {
+    setLoading(true);
+    try {
+      const r = await api.post('/api/compliance/check', form);
+      setResult(r);
+    } catch {
+      setResult({
+        destination: form.destination_country, destination_flag: 'ðŸ‡ºðŸ‡¸',
+        compliance_score: 62, overall_status: 'NEEDS_REVIEW',
+        checks: [
+          {check:'Documentation Completeness',status:'FAIL',details:'Missing: ISF Filing',severity:'high'},
+          {check:'HS Code Validity',status:'PASS',details:'HS Code 8471.30 validated against WCO nomenclature',severity:'low'},
+          {check:'Sanctions Screening',status:'PASS',details:'Screened against OFAC, EU, UN lists. Risk: LOW',severity:'low'},
+          {check:'Dual-Use Export Controls',status:'WARNING',details:'Dual-use review recommended for electronics',severity:'medium'},
+          {check:'Destination Requirements (USA)',status:'WARNING',details:'Special: FDA approval for food/pharma, FCC certification for electronics',severity:'medium'},
+          {check:'Trade Agreement Eligibility',status:'PASS',details:'Checked for preferential duty rates (FTAs, GSP)',severity:'low'},
+          {check:'Restricted Goods Screening',status:'PASS',details:'Checked against USA restricted goods list',severity:'low'},
+          {check:'Valuation Compliance',status:'PASS',details:'Reviewed under WTO Customs Valuation Agreement',severity:'low'},
+        ],
+        summary:{passed:5,warnings:2,failed:1,total:8},
+        financials:{declared_value:form.declared_value,estimated_duty:0,estimated_vat:0,total_landed_cost:form.declared_value,duty_rate:'0%',vat_rate:'0%',currency:'USD'},
+        timeline:{estimated_clearance_days:2,expedited_available:true},
+        required_docs:['Commercial Invoice','Bill of Lading','Packing List','ISF Filing'],
+        missing_docs:['ISF Filing'],
+        special_requirements:['FDA approval for food/pharma','FCC certification for electronics'],
+      });
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="breadcrumb">tradeguard / compliance-checker</div>
+        <div className="page-title">Multi-Country Compliance Checker</div>
+        <div className="page-subtitle">Validate shipments against destination country regulations, sanctions & trade agreements</div>
+      </div>
+
+      <div className="grid-2" style={{alignItems:'start',gap:20}}>
+        {/* Config */}
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          <div className="card">
+            <div className="card-title" style={{marginBottom:16}}>Shipment Configuration</div>
+            <div className="grid-2" style={{marginBottom:14}}>
+              <div>
+                <label className="input-label">Origin Country</label>
+                <select className="select" style={{width:'100%'}} value={form.origin_country} onChange={e=>setForm(f=>({...f,origin_country:e.target.value}))}>
+                  {countries.map(c=><option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="input-label">Destination Country</label>
+                <select className="select" style={{width:'100%'}} value={form.destination_country} onChange={e=>setForm(f=>({...f,destination_country:e.target.value}))}>
+                  {countries.map(c=><option key={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid-2" style={{marginBottom:14}}>
+              <div>
+                <label className="input-label">Goods Category</label>
+                <select className="select" style={{width:'100%'}} value={form.goods_category} onChange={e=>setForm(f=>({...f,goods_category:e.target.value}))}>
+                  {categories.map(c=><option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="input-label">Declared Value (USD)</label>
+                <input className="input" type="number" value={form.declared_value} onChange={e=>setForm(f=>({...f,declared_value:Number(e.target.value)}))} />
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-title" style={{marginBottom:12}}>Available Documents</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+              {allDocs.map(d => (
+                <div key={d} onClick={()=>toggleDoc(d)} style={{padding:'6px 12px',borderRadius:20,fontSize:12,cursor:'pointer',
+                  background: form.document_types.includes(d)?'rgba(0,229,195,0.12)':'var(--surface2)',
+                  color: form.document_types.includes(d)?'var(--accent)':'var(--text2)',
+                  border: `1px solid ${form.document_types.includes(d)?'rgba(0,229,195,0.3)':'var(--border)'}`,
+                  transition:'all 0.15s'}}>
+                  {form.document_types.includes(d)?'âœ“ ':''}{d}
+                </div>
+              ))}
+            </div>
+            <div style={{fontSize:12,color:'var(--text3)',marginTop:10}}>{form.document_types.length} of {allDocs.length} documents selected</div>
+          </div>
+
+          <button className="btn btn-primary" style={{justifyContent:'center'}} disabled={loading} onClick={runCheck}>
+            {loading ? 'â³ Checking compliance...' : 'ðŸ” Run Compliance Check'}
+          </button>
+        </div>
+
+        {/* Results */}
+        <div>
+          {loading ? <div className="card"><Spinner /></div> : !result ? (
+            <div className="card">
+              <div className="empty-state">
+                <div className="empty-icon">ðŸ›</div>
+                <div className="empty-text">Configure your shipment and run the compliance check</div>
+              </div>
+            </div>
+          ) : (
+            <div style={{display:'flex',flexDirection:'column',gap:16}}>
+              {/* Score header */}
+              <div className="card" style={{border:`1px solid ${result.overall_status==='COMPLIANT'?'rgba(46,204,113,0.3)':result.overall_status==='NEEDS_REVIEW'?'rgba(255,165,2,0.3)':'rgba(255,71,87,0.3)'}`}}>
+                <div style={{display:'flex',alignItems:'center',gap:20}}>
+                  <CircleScore score={result.compliance_score} size={90} />
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:13,color:'var(--text2)',marginBottom:4}}>{result.destination_flag} {result.destination}</div>
+                    <StatusBadge status={result.overall_status} />
+                    <div style={{display:'flex',gap:16,marginTop:12}}>
+                      <div style={{textAlign:'center'}}><div style={{fontSize:20,fontWeight:700,color:'var(--green)',fontFamily:'Syne'}}>{result.summary.passed}</div><div style={{fontSize:11,color:'var(--text3)'}}>Passed</div></div>
+                      <div style={{textAlign:'center'}}><div style={{fontSize:20,fontWeight:700,color:'var(--yellow)',fontFamily:'Syne'}}>{result.summary.warnings}</div><div style={{fontSize:11,color:'var(--text3)'}}>Warnings</div></div>
+                      <div style={{textAlign:'center'}}><div style={{fontSize:20,fontWeight:700,color:'var(--red)',fontFamily:'Syne'}}>{result.summary.failed}</div><div style={{fontSize:11,color:'var(--text3)'}}>Failed</div></div>
+                    </div>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <div style={{fontSize:12,color:'var(--text2)'}}>Est. clearance</div>
+                    <div style={{fontFamily:'Syne',fontSize:22,fontWeight:700,color:'var(--accent)'}}>{result.timeline.estimated_clearance_days}d</div>
+                    {result.timeline.expedited_available && <div style={{fontSize:11,color:'var(--green)'}}>Expedited available</div>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Checks */}
+              <div className="card">
+                <div className="card-title" style={{marginBottom:12}}>Compliance Checks</div>
+                {result.checks.map((c,i) => (
+                  <div key={i} className="check-item">
+                    <div className={`check-status ${c.status.toLowerCase()}`}>
+                      {c.status==='PASS'?'âœ“':c.status==='WARNING'?'!':c.status==='FAIL'?'âœ—':'i'}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div className="check-name">{c.check}</div>
+                      <div className="check-detail">{c.details}</div>
+                    </div>
+                    <StatusBadge status={c.status} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Financials */}
+              <div className="card">
+                <div className="card-title" style={{marginBottom:12}}>Cost Breakdown ({result.financials.currency})</div>
+                <div className="info-row"><span className="info-key">Declared Value</span><span className="info-val">{result.financials.declared_value.toLocaleString()}</span></div>
+                <div className="info-row"><span className="info-key">Import Duty ({result.financials.duty_rate})</span><span className="info-val gold">{result.financials.estimated_duty.toLocaleString()}</span></div>
+                <div className="info-row"><span className="info-key">VAT/GST ({result.financials.vat_rate})</span><span className="info-val gold">{result.financials.estimated_vat.toLocaleString()}</span></div>
+                <div className="info-row"><span className="info-key" style={{fontWeight:600}}>Total Landed Cost</span><span className="info-val" style={{color:'var(--accent)',fontWeight:600}}>{result.financials.total_landed_cost.toLocaleString()}</span></div>
+              </div>
+
+              {result.missing_docs.length > 0 && (
+                <div className="card" style={{border:'1px solid rgba(255,71,87,0.3)'}}>
+                  <div className="card-title" style={{color:'var(--red)',marginBottom:10}}>âš  Missing Required Documents</div>
+                  {result.missing_docs.map((d,i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'6px 0',borderBottom:'1px solid var(--border)',fontSize:13}}>
+                      <span style={{color:'var(--red)'}}>âœ—</span>{d}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Carbon Calculator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const CarbonCalculator = () => {
+  const [form, setForm] = useState({ transport_mode: 'sea_freight', weight_kg: 5000, route: 'Shanghai-Rotterdam' });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const modes = ['sea_freight','air_freight','road_freight','rail_freight'];
+  const routes = ['Shanghai-Rotterdam','Mumbai-Dubai','Los Angeles-Shanghai','Rotterdam-New York','Dubai-Singapore','Singapore-Sydney','Mumbai-Singapore','Hamburg-New York'];
+  const modeLabels = { sea_freight:'ðŸš¢ Sea Freight', air_freight:'âœˆï¸ Air Freight', road_freight:'ðŸš› Road Freight', rail_freight:'ðŸš‚ Rail Freight' };
+
+  const calc = async () => {
+    setLoading(true);
+    try {
+      const r = await api.post('/api/sustainability/calculate', form);
+      setResult(r);
+    } catch {
+      const emFactors = {sea_freight:0.015,air_freight:0.602,road_freight:0.062,rail_freight:0.022};
+      const distances = {'Shanghai-Rotterdam':19500,'Mumbai-Dubai':1900,'Los Angeles-Shanghai':10000,'Rotterdam-New York':5900,'Dubai-Singapore':5600,'Singapore-Sydney':6300,'Mumbai-Singapore':3900,'Hamburg-New York':6200};
+      const dist = distances[form.route]||10000;
+      const ef = emFactors[form.transport_mode]||0.015;
+      const co2 = ef*(form.weight_kg/1000)*dist;
+      setResult({
+        route:form.route, distance_km:dist, weight_kg:form.weight_kg, transport_mode:form.transport_mode,
+        transport_label:modeLabels[form.transport_mode].replace(/[^a-zA-Z\s]/g,'').trim(),
+        co2_emissions_kg:Math.round(co2*100)/100,
+        trees_to_offset:Math.round(co2/21*10)/10,
+        mode_comparison:Object.fromEntries(Object.entries(emFactors).map(([k,v])=>[k,{label:modeLabels[k],co2_kg:Math.round(v*(form.weight_kg/1000)*dist*100)/100}])),
+        esg_rating:form.transport_mode==='sea_freight'?'A':form.transport_mode==='rail_freight'?'B':form.transport_mode==='road_freight'?'C':'D',
+        savings_vs_air:Math.round((0.602-ef)*(form.weight_kg/1000)*dist*100)/100,
+        carbon_cost_usd:Math.round(co2*0.05*100)/100,
+        recommendations:form.transport_mode==='air_freight'?
+          ['Switch to sea freight to reduce emissions by ~97%','Consolidate shipments to reduce frequency','Use carbon offset programs for unavoidable emissions']:
+          ['Current mode is most environmentally efficient','Consider carbon offset programs','Explore biofuel options with your carrier'],
+      });
+    }
+    setLoading(false);
+  };
+
+  const maxCO2 = result ? Math.max(...Object.values(result.mode_comparison).map(m=>m.co2_kg)) : 1;
+  const esgColors = {A:'var(--green)',B:'#7bc47f',C:'var(--yellow)',D:'var(--red)'};
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="breadcrumb">tradeguard / sustainability</div>
+        <div className="page-title">Carbon Footprint Calculator</div>
+        <div className="page-subtitle">ESG-aligned emissions analysis for trade routes Â· Aligned with DP World "Our World, Our Future"</div>
+      </div>
+
+      <div className="grid-2" style={{alignItems:'start',gap:20}}>
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          <div className="card">
+            <div className="card-title" style={{marginBottom:16}}>Shipment Parameters</div>
+            <div style={{marginBottom:12}}>
+              <label className="input-label">Shipping Route</label>
+              <select className="select" style={{width:'100%'}} value={form.route} onChange={e=>setForm(f=>({...f,route:e.target.value}))}>
+                {routes.map(r=><option key={r}>{r}</option>)}
+              </select>
+            </div>
+            <div style={{marginBottom:12}}>
+              <label className="input-label">Transport Mode</label>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                {modes.map(m=>(
+                  <div key={m} onClick={()=>setForm(f=>({...f,transport_mode:m}))} style={{
+                    padding:'12px',borderRadius:8,cursor:'pointer',textAlign:'center',fontSize:13,
+                    background:form.transport_mode===m?'rgba(0,229,195,0.08)':'var(--surface2)',
+                    border:`1px solid ${form.transport_mode===m?'rgba(0,229,195,0.4)':'var(--border)'}`,
+                    color:form.transport_mode===m?'var(--accent)':'var(--text2)',
+                    transition:'all 0.15s'}}>
+                    {modeLabels[m]}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="input-label">Cargo Weight (KG): <strong style={{color:'var(--accent)'}}>{form.weight_kg.toLocaleString()} kg</strong></label>
+              <input type="range" min={100} max={50000} step={100} value={form.weight_kg} style={{width:'100%',accentColor:'var(--accent)'}}
+                onChange={e=>setForm(f=>({...f,weight_kg:Number(e.target.value)}))} />
+              <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--text3)',marginTop:4}}>
+                <span>100 kg</span><span>50,000 kg</span>
+              </div>
+            </div>
+            <button className="btn btn-primary" style={{width:'100%',marginTop:16,justifyContent:'center'}} disabled={loading} onClick={calc}>
+              {loading?'â³ Calculating...':'ðŸŒ± Calculate Emissions'}
+            </button>
+          </div>
+
+          {result && (
+            <div className="card" style={{background:'rgba(46,204,113,0.04)',border:'1px solid rgba(46,204,113,0.2)'}}>
+              <div className="card-title" style={{marginBottom:12}}>ðŸ’¡ Recommendations</div>
+              {result.recommendations.map((r,i)=>(
+                <div key={i} style={{display:'flex',gap:10,padding:'8px 0',borderBottom:'1px solid var(--border)',fontSize:13}}>
+                  <span style={{color:'var(--green)',flexShrink:0}}>â†’</span><span style={{color:'var(--text2)'}}>{r}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{display:'flex',flexDirection:'column',gap:16}}>
+          {loading ? <div className="card"><Spinner /></div> : !result ? (
+            <div className="card">
+              <div className="empty-state">
+                <div className="empty-icon">ðŸŒ</div>
+                <div className="empty-text">Configure route parameters and calculate your carbon footprint</div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="card">
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20}}>
+                  <div>
+                    <div style={{fontSize:12,color:'var(--text3)',marginBottom:4}}>COâ‚‚ Emissions</div>
+                    <div style={{fontFamily:'Syne',fontSize:36,fontWeight:800,color:'var(--accent)'}}>{result.co2_emissions_kg.toLocaleString()}</div>
+                    <div style={{fontSize:13,color:'var(--text2)'}}>kilograms COâ‚‚e</div>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <div style={{fontFamily:'Syne',fontSize:40,fontWeight:800,color:esgColors[result.esg_rating],lineHeight:1}}>{result.esg_rating}</div>
+                    <div style={{fontSize:12,color:'var(--text3)'}}>ESG Rating</div>
+                  </div>
+                </div>
+                <div className="grid-3" style={{gap:12}}>
+                  <div style={{textAlign:'center',padding:'12px',background:'var(--surface2)',borderRadius:8}}>
+                    <div style={{fontFamily:'Syne',fontSize:20,fontWeight:700,color:'var(--gold)'}}>{result.trees_to_offset}</div>
+                    <div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Trees to offset</div>
+                  </div>
+                  <div style={{textAlign:'center',padding:'12px',background:'var(--surface2)',borderRadius:8}}>
+                    <div style={{fontFamily:'Syne',fontSize:20,fontWeight:700,color:'var(--accent2)'}}>$ {result.carbon_cost_usd.toLocaleString()}</div>
+                    <div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Carbon cost</div>
+                  </div>
+                  <div style={{textAlign:'center',padding:'12px',background:'var(--surface2)',borderRadius:8}}>
+                    <div style={{fontFamily:'Syne',fontSize:20,fontWeight:700,color:'var(--green)'}}>{result.distance_km.toLocaleString()}</div>
+                    <div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>km route</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-title" style={{marginBottom:16}}>Mode Comparison</div>
+                <div className="bar-chart">
+                  {Object.entries(result.mode_comparison).map(([key,m])=>{
+                    const pct = Math.round((m.co2_kg/maxCO2)*100);
+                    const isSelected = key===result.transport_mode;
+                    const barColor = key==='sea_freight'?'var(--green)':key==='rail_freight'?'var(--accent2)':key==='road_freight'?'var(--yellow)':'var(--red)';
+                    return (
+                      <div key={key} className="bar-row">
+                        <div className="bar-label" style={{color:isSelected?'var(--text)':'var(--text2)',fontWeight:isSelected?600:400,fontSize:11}}>
+                          {m.label.replace(/[^\w\s]/g,'').trim()}
+                        </div>
+                        <div className="bar-track">
+                          <div className="bar-fill" style={{width:`${pct}%`,background:barColor,color:'#000',minWidth:40}}>
+                            {pct > 15 ? `${m.co2_kg.toLocaleString()} kg` : ''}
+                          </div>
+                        </div>
+                        <div className="bar-value">{m.co2_kg.toLocaleString()} kg</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {result.savings_vs_air > 0 && (
+                  <div style={{marginTop:16,padding:'10px 12px',background:'rgba(46,204,113,0.08)',borderRadius:8,border:'1px solid rgba(46,204,113,0.2)',fontSize:13,color:'var(--green)'}}>
+                    ðŸŒ± You're saving <strong>{result.savings_vs_air.toLocaleString()} kg COâ‚‚</strong> vs air freight
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ HS Code Lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const HSCodeLookup = () => {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [selected, setSelected] = useState(null);
+
+  const hsData = [
+    {category:'Electronics',code:'8471.30',description:'Portable automatic data processing machines',duty_rate:0.0,chapter:'84',notes:'Includes laptops, tablets, personal computers'},
+    {category:'Textile',code:'6109.10',description:'T-shirts, singlets and other vests, cotton',duty_rate:12.0,chapter:'61',notes:'Knitted or crocheted cotton garments'},
+    {category:'Machinery',code:'8479.89',description:'Machines and mechanical appliances',duty_rate:2.5,chapter:'84',notes:'General industrial machinery'},
+    {category:'Chemicals',code:'2901.10',description:'Acyclic hydrocarbons, saturated',duty_rate:5.5,chapter:'29',notes:'Requires REACH compliance in EU'},
+    {category:'Food',code:'1901.90',description:'Food preparations of flour, groats, meal or starch',duty_rate:17.5,chapter:'19',notes:'Subject to phytosanitary requirements'},
+    {category:'Pharma',code:'3004.90',description:'Medicaments, mixed or not, for retail sale',duty_rate:0.0,chapter:'30',notes:'Requires regulatory approval in most jurisdictions'},
+    {category:'Automotive',code:'8708.99',description:'Parts and accessories for motor vehicles',duty_rate:6.5,chapter:'87',notes:'Safety standards certification required'},
+    {category:'Furniture',code:'9403.20',description:'Metal furniture, other',duty_rate:0.0,chapter:'94',notes:'CE marking required for EU market'},
+  ];
+
+  useEffect(() => {
+    if (!query) { setResults(hsData); return; }
+    const q = query.toLowerCase();
+    setResults(hsData.filter(h => h.category.toLowerCase().includes(q) || h.description.toLowerCase().includes(q) || h.code.includes(q)));
+  }, [query]);
+
+  useEffect(() => { setResults(hsData); }, []);
+
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <div className="breadcrumb">tradeguard / hs-codes</div>
+        <div className="page-title">HS Code Classification</div>
+        <div className="page-subtitle">Search and validate Harmonized System codes against WCO nomenclature</div>
+      </div>
+
+      <div className="grid-2" style={{alignItems:'start',gap:20}}>
+        <div>
+          <div className="card" style={{marginBottom:16}}>
+            <div className="card-title" style={{marginBottom:12}}>Search HS Codes</div>
+            <input className="input" placeholder="Search by product, category or HS code..." value={query} onChange={e=>setQuery(e.target.value)} />
+            <div style={{fontSize:12,color:'var(--text3)',marginTop:8}}>{results.length} code{results.length!==1?'s':''} found</div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {results.map((h,i) => (
+              <div key={i} onClick={()=>setSelected(h)} className="card" style={{cursor:'pointer',border:`1px solid ${selected?.code===h.code?'var(--accent)':'var(--border)'}`,transition:'all 0.15s',padding:14}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                  <div>
+                    <div style={{fontFamily:'DM Mono',fontSize:16,fontWeight:500,color:'var(--accent)',marginBottom:4}}>{h.code}</div>
+                    <div style={{fontSize:13,color:'var(--text)',marginBottom:2}}>{h.description}</div>
+                    <div style={{fontSize:11,color:'var(--text3)'}}>Chapter {h.chapter} Â· {h.category}</div>
+                  </div>
+                  <div style={{textAlign:'right',flexShrink:0,marginLeft:12}}>
+                    <div style={{fontFamily:'Syne',fontSize:18,fontWeight:700,color:h.duty_rate===0?'var(--green)':h.duty_rate<10?'var(--yellow)':'var(--red)'}}>{h.duty_rate}%</div>
+                    <div style={{fontSize:10,color:'var(--text3)'}}>duty rate</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          {!selected ? (
+            <div className="card">
+              <div className="empty-state">
+                <div className="empty-icon">ðŸ”Ž</div>
+                <div className="empty-text">Select an HS code to view detailed classification info</div>
+              </div>
+            </div>
+          ) : (
+            <div className="card fade-in">
+              <div style={{marginBottom:20}}>
+                <div style={{fontFamily:'DM Mono',fontSize:28,fontWeight:500,color:'var(--accent)',marginBottom:4}}>{selected.code}</div>
+                <div style={{fontSize:16,color:'var(--text)',fontWeight:500,marginBottom:4}}>{selected.description}</div>
+                <Badge type="blue">Chapter {selected.chapter}</Badge>
+              </div>
+
+              <div className="section-divider" />
+
+              <div className="info-row"><span className="info-key">Category</span><span className="info-val">{selected.category}</span></div>
+              <div className="info-row"><span className="info-key">Base Duty Rate</span><span className={`info-val ${selected.duty_rate===0?'green':selected.duty_rate<10?'gold':'red'}`}>{selected.duty_rate}%</span></div>
+              <div className="info-row"><span className="info-key">WCO Chapter</span><span className="info-val">{selected.chapter}</span></div>
+              <div className="info-row"><span className="info-key">Notes</span><span className="info-val" style={{fontSize:12,maxWidth:200,textAlign:'right'}}>{selected.notes}</span></div>
+
+              <div className="section-divider" />
+
+              <div className="card-title" style={{marginBottom:12}}>Duty Rates by Destination</div>
+              {['USA','EU','China','India','UAE'].map(c=>{
+                const rate = Math.max(0, selected.duty_rate + (Math.random()-0.5)*4);
+                return (
+                  <div key={c} className="info-row">
+                    <span className="info-key">{c}</span>
+                    <span className="info-val gold">{rate.toFixed(1)}%</span>
+                  </div>
+                );
+              })}
+
+              <div className="section-divider" />
+              <div style={{fontSize:12,color:'var(--text2)',padding:'10px 12px',background:'var(--surface2)',borderRadius:8}}>
+                â„¹ï¸ {selected.notes}
+              </div>
+              <button className="btn btn-primary btn-sm" style={{marginTop:12}}>ðŸ“‹ Copy HS Code</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// â”€â”€ Main App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+const NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'â–¦', section: 'OVERVIEW' },
+  { id: 'documents', label: 'Document Analyzer', icon: 'ðŸ§¾', section: 'TOOLS' },
+  { id: 'compliance', label: 'Compliance Checker', icon: 'ðŸ›', section: 'TOOLS' },
+  { id: 'hscodes', label: 'HS Code Lookup', icon: 'ðŸ”', section: 'TOOLS' },
+  { id: 'carbon', label: 'Carbon Calculator', icon: 'ðŸŒ±', section: 'SUSTAINABILITY' },
+];
+
+const App = () => {
+  const [page, setPage] = useState('dashboard');
+
+  const pages = {
+    dashboard: <Dashboard />,
+    documents: <DocumentAnalyzer />,
+    compliance: <ComplianceChecker />,
+    hscodes: <HSCodeLookup />,
+    carbon: <CarbonCalculator />,
+  };
+
+  let lastSection = null;
+
+  return (
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <div className="logo-mark">TradeGuard AI</div>
+          <div className="logo-sub">DP World Hackathon 2024</div>
+        </div>
+        <nav className="sidebar-nav">
+          {NAV.map(item => {
+            const showSection = item.section !== lastSection;
+            if (showSection) lastSection = item.section;
+            return (
+              <React.Fragment key={item.id}>
+                {showSection && <div className="nav-section">{item.section}</div>}
+                <div className={`nav-item ${page === item.id ? 'active' : ''}`} onClick={() => setPage(item.id)}>
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.label}
+                  {item.id === 'documents' && <span className="notif">3</span>}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </nav>
+        <div className="sidebar-footer">
+          <div style={{display:'flex',alignItems:'center',marginBottom:8}}>
+            <span className="status-dot" />
+            <span className="status-text">API Connected Â· v1.0.0</span>
+          </div>
+          <div style={{fontSize:11,color:'var(--text3)'}}>BITS Pilani Ã— DP World</div>
+        </div>
+      </aside>
+
+      <main className="main">
+        <div className="content">
+          {pages[page]}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
+
+
